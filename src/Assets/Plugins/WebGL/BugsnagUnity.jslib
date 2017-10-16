@@ -95,11 +95,11 @@ var BugsnagPlugin = {
     },
     LeaveBreadcrumb: function(breadcrumb)
     {
-        // Do nothing as we don't support breadcrumbs for the js notifier
+        Bugsnag.leaveBreadcrumb(breadcrumb);
     },
     SetBreadcrumbCapacity: function(capacity)
     {
-        // Do nothing as we don't support breadcrumbs for the js notifier
+        Bugsnag.breadcrumbLimit = capacity;
     },
     SetAppVersion: function(version)
     {
