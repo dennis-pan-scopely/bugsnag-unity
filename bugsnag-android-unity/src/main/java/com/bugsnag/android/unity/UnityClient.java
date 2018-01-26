@@ -10,9 +10,15 @@ import com.bugsnag.android.*;
 
 public class UnityClient {
 
-    public static void init(Context androidContext, String apiKey, boolean trackSessions) {
+    public static void init(Context androidContext, String apiKey, boolean trackSessions, String endpoint, String sessionEndpoint) {
         Configuration config = new Configuration(apiKey);
         config.setAutoCaptureSessions(trackSessions);
+        if (endpoint != null && endpoint.length() > 0) {
+            config.setEndpoint(endpoint);
+        }
+        if (sessionEndpoint != null && sessionEndpoint.length() > 0) {
+            config.setSessionEndpoint(sessionEndpoint);
+        }
         Bugsnag.init(androidContext, config);
         if (trackSessions) {
             Bugsnag.startSession();

@@ -10,7 +10,7 @@ extern "C" {
     void BSGSetReleaseStage(char *releaseStage);
     void BSGSetAutoNotify(int autoNotify);
     void BSGNotify(char *errorClass, char *errorMessage, char *severity, char *context, char *stackTrace, char *logType, char *severityReason);
-    void BSGRegister(char *apiKey, bool trackSessions);
+    void BSGRegister(char *apiKey, bool trackSessions, char *notifyURL, char *sessionURL);
     void BSGAddToTab(char *tabName, char *attributeName, char *attributeValue);
     void BSGClearTab(char *tabName);
     void BSGLeaveBreadcrumb(char *breadcrumb);
@@ -125,8 +125,10 @@ extern "C" {
         });
     }
 
-    void BSGRegister(char *apiKey, bool trackSessions) {
+    void BSGRegister(char *apiKey, bool trackSessions, char *notifyURL, char *sessionURL) {
         NSString *ns_apiKey = [NSString stringWithUTF8String: apiKey];
+        NSString *ns_notifyURL = [NSString stringWithUTF8String:notifyURL];
+        NSString *ns_sessionURL = [NSString stringWithUTF8String:sessionURL];
 
         // Disable thread suspension so there is no noticable lag in sending Bugsnags
         [Bugsnag setSuspendThreadsForUserReported:false];
@@ -143,6 +145,12 @@ extern "C" {
         BugsnagConfiguration *config = [BugsnagConfiguration new];
         config.apiKey = ns_apiKey;
         config.shouldAutoCaptureSessions = trackSessions;
+        if (ns_notifyURL.length > 0) {
+            config.notifyURL = [NSURL URLWithString:ns_notifyURL];
+        }
+        if (ns_sessionURL.length > 0) {
+            config.sessionURL = [NSURL URLWithString:ns_sessionURL];
+        }
         [Bugsnag startBugsnagWithConfiguration:config];
 
         id notifier = [Bugsnag notifier];
