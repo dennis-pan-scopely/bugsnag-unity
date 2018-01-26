@@ -14,6 +14,9 @@ public class UnityClient {
         Configuration config = new Configuration(apiKey);
         config.setAutoCaptureSessions(trackSessions);
         Bugsnag.init(androidContext, config);
+        if (trackSessions) {
+            Bugsnag.startSession();
+        }
     }
 
     public static void notify(String name, String message,
