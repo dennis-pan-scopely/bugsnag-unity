@@ -30,7 +30,8 @@ task :build do
 
   # Create the individual platform plugins
   Rake::Task[:create_webgl_plugin].invoke(assets_path)
-  Rake::Task[:create_cocoa_plugins].invoke(assets_path)
+  Rake::Task[:create_osx_plugin].invoke(assets_path)
+  Rake::Task[:create_ios_plugin].invoke(assets_path)
   Rake::Task[:create_android_plugin].invoke(assets_path)
   Rake::Task[:create_csharp_plugin].invoke(assets_path)
 
@@ -91,12 +92,46 @@ task :create_android_plugin, [:path] do |task, args|
   cp android_lib, android_dir
 end
 
-task :create_cocoa_plugins, [:path] do |task, args|
+task :create_ios_plugin, [:path] do |task, args|
+  bugsnag_unity_file = File.realpath("BugsnagUnity.mm", "src")
+  ios_dir = File.join(args[:path], "iOS", "Bugsnag")
+
+  # Copy iOS bugsnag notifier and KSCrash directory files
+  bugsnag_path = "bugsnag-cocoa/Source"
+  kscrash_dir = "bugsnag-cocoa/Source/KSCrash/Source/KSCrash/"
+  recording_path = kscrash_dir + "Recording"
+  reporting_path = kscrash_dir + "Reporting"
+
+  # Copy over basic additional KSCrash reporting files
+  recording_sentry_path = kscrash_dir + "Recording/Sentry"
+  recording_tools_path = kscrash_dir + "Recording/Tools"
+  kscrash_filter_path = kscrash_dir + "Reporting/Filters/"
+
+  `find #{recording_path} #{reporting_path} #{bugsnag_path} #{recording_sentry_path} #{recording_tools_path} #{kscrash_filter_path} -name '*.m' -or -name '*.c' -or -name '*.mm' -or -name '*.h' -or -name '*.cpp'`.split("\n").each do |x|
+    cp x, ios_dir, verbose: false
+  end
+
+  # Copy unity to bugsnag-cocoa wrapper
+  cp bugsnag_unity_file, ios_dir
+
+  # Replace framework reference <Bugsnag/Bugsnag.h> with direct header file "Bugsnag.h" in the wrapper file
+  wrapper_file = ios_dir + "/BugsnagUnity.mm"
+  `sed -e 's/^\\(#import \\)<Bugsnag\\/\\(.*.h\\)>/\\1\"\\2\"/' -i '' #{wrapper_file}`
+
+  # Rename any <KSCrash/*.h> framework references to the specific header files
+  Dir[ios_dir + "/*.*"].each do |file|
+    `sed -e 's/^\\(#import \\)<KSCrash\\/\\(.*.h\\)>/\\1\"\\2\"/' -i '' #{file}`
+  end
+end
+
+task :create_osx_plugin, [:path] do |task, args|
   build_dir = "bugsnag-cocoa-build"
+  project_name = "bugsnag-osx"
   FileUtils.rm_rf build_dir
   FileUtils.mkdir_p build_dir
-  FileUtils.cp_r "bugsnag-cocoa/Source", build_dir
   bugsnag_unity_file = File.realpath("BugsnagUnity.mm", "src")
+
+  FileUtils.cp_r "bugsnag-cocoa/Source", build_dir
   public_headers = [
     "BugsnagMetaData.h",
     "Bugsnag.h",
@@ -107,58 +142,36 @@ task :create_cocoa_plugins, [:path] do |task, args|
   ]
 
   cd build_dir do
-    ["bugsnag-ios", "bugsnag-osx"].each do |project_name|
-      project_file = File.join("#{project_name}.xcodeproj")
-      project = Xcodeproj::Project.new(project_file)
+    project_file = File.join("#{project_name}.xcodeproj")
+    project = Xcodeproj::Project.new(project_file)
+    target = project.new_target(:bundle, "bugsnag-osx", :osx, "10.11")
+    group = project.new_group("Bugsnag")
 
-      case project_name
-      when "bugsnag-ios"
-        target = project.new_target(:static_library, "bugsnag-ios", :ios)
-      when "bugsnag-osx"
-        target = project.new_target(:bundle, "bugsnag-osx", :osx, "10.11")
-      end
+    source_files = Dir.glob(File.join("Source", "**", "*.{c,h,mm,cpp,m}"))
+      .map(&File.method(:realpath))
+      .tap { |files| files << bugsnag_unity_file }
+      .map { |f| group.new_file(f) }
 
-      group = project.new_group("Bugsnag")
-
-      source_files = Dir.glob(File.join("Source", "**", "*.{c,h,mm,cpp,m}"))
-        .map(&File.method(:realpath))
-        .tap { |files| files << bugsnag_unity_file }
-        .map { |f| group.new_file(f) }
-
-      target.add_file_references(source_files) do |build_file|
-        if public_headers.include? build_file.file_ref.name
-          build_file.settings = { "ATTRIBUTES" => ["Public"] }
-        end
-      end
-
-      project.build_configurations.each do |build_configuration|
-        case build_configuration.type
-        when :debug
-          build_configuration.build_settings["OTHER_CFLAGS"] = "-fembed-bitcode-marker"
-        when :release
-          build_configuration.build_settings["OTHER_CFLAGS"] = "-fembed-bitcode"
-        end
-      end
-
-      project.save
-      Open3.pipeline(["xcodebuild", "-project", "#{project_name}.xcodeproj", "-configuration", "Release", "build", "build"], ["xcpretty"])
-      if project_name == "bugsnag-ios"
-        Open3.pipeline(["xcodebuild", "-project", "#{project_name}.xcodeproj", "-configuration", "Release", "-sdk", "iphonesimulator", "build", "build"], ["xcpretty"])
+    target.add_file_references(source_files) do |build_file|
+      if public_headers.include? build_file.file_ref.name
+        build_file.settings = { "ATTRIBUTES" => ["Public"] }
       end
     end
-  end
 
-  osx_dir = File.join(args[:path], "OSX", "Bugsnag")
-  ios_dir = File.join(args[:path], "iOS", "Bugsnag")
+    project.build_configurations.each do |build_configuration|
+      case build_configuration.type
+      when :debug
+        build_configuration.build_settings["OTHER_CFLAGS"] = "-fembed-bitcode-marker"
+      when :release
+        build_configuration.build_settings["OTHER_CFLAGS"] = "-fembed-bitcode"
+      end
+    end
 
-  cd build_dir do
+    project.save
+    Open3.pipeline(["xcodebuild", "-project", "#{project_name}.xcodeproj", "-configuration", "Release", "build", "build"], ["xcpretty"])
+    osx_dir = File.join(args[:path], "OSX", "Bugsnag")
     cd "build" do
       cp_r File.join("Release", "bugsnag-osx.bundle"), osx_dir
-
-      device_library = File.join("Release-iphoneos", "libbugsnag-ios.a")
-      simulator_library = File.join("Release-iphonesimulator", "libbugsnag-ios.a")
-      output_library = File.join(ios_dir, "libbugsnag-ios.a")
-      sh "lipo", "-create", device_library, simulator_library, "-output", output_library
     end
   end
 end
