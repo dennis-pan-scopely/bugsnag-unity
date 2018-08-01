@@ -139,7 +139,7 @@ namespace BugsnagUnity
 
     public void Notify(System.Exception exception)
     {
-      Notify(exception, null);
+      Notify(exception, HandledState.ForHandledException(), null);
     }
 
     public void Notify(System.Exception exception, Middleware callback)
@@ -160,6 +160,13 @@ namespace BugsnagUnity
     void Notify(System.Exception exception, HandledState handledState, Middleware callback)
     {
       var @event = new Payload.Event(Configuration.Context, GenerateMetadata(), GenerateAppData(), GenerateDeviceData(), User, new Exceptions(exception).ToArray(), handledState, Breadcrumbs.Retrieve(), SessionTracking.CurrentSession);
+      var eventException = @event.Exceptions[0];
+      if (eventException.StackTrace.Count() == 0)
+      {
+        var lines = new StackTrace(new System.Diagnostics.StackTrace(true));
+        @event.Exceptions[0] = new Payload.Exception(eventException.ErrorClass, eventException.ErrorMessage, lines.ToArray());
+      }
+
       var report = new Report(Configuration, @event);
       Notify(report, callback);
     }

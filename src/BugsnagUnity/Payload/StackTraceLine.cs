@@ -16,6 +16,8 @@ namespace BugsnagUnity.Payload
 
     private readonly string _originalStackTrace;
 
+    private readonly StackFrame[] _originalFrames;
+
     private static string[] StringSplit { get; } = { Environment.NewLine };
 
     /// <summary>
@@ -34,8 +36,21 @@ namespace BugsnagUnity.Payload
       _originalException = exception;
     }
 
+    internal StackTrace(System.Diagnostics.StackTrace stackTrace)
+    {
+      _originalFrames = stackTrace.GetFrames();
+    }
+
     public IEnumerator<StackTraceLine> GetEnumerator()
     {
+      if (_originalFrames != null)
+      {
+        foreach (var frame in _originalFrames)
+        {
+          yield return StackTraceLine.FromStackFrame(frame);
+        }
+        yield break;
+      }
       if (_originalStackTrace != null)
       {
         foreach (var item in _originalStackTrace.Split(StringSplit, StringSplitOptions.RemoveEmptyEntries))
