@@ -5,7 +5,7 @@
 
 # Scenario hooks
 Before do
-# Runs before every Scenario
+  `git clean -xdf features`
 end
 
 After do

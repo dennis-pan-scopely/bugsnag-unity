@@ -7,7 +7,6 @@ pushd "${0%/*}"
     package_path=`pwd`
   popd
   pushd ../fixtures
-    git clean -xdf .
     log_file="$package_path/unity.log"
     project_path="$(pwd)/unity_project"
 
@@ -26,6 +25,6 @@ pushd "${0%/*}"
 
     Unity -nographics -quit -batchmode -logFile $log_file \
       -projectPath $project_path \
-      -buildOSXUniversalPlayer "$(pwd)/Mazerunner.app"
+      -executeMethod "Main.$1"
   popd
 popd

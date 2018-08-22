@@ -20,6 +20,15 @@ public class Main : MonoBehaviour {
     scenes.Add(new EditorBuildSettingsScene("Assets/MainScene.unity", true));
     EditorBuildSettings.scenes = scenes.ToArray();
   }
+
+  public static void MacOS() {
+    BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+    buildPlayerOptions.scenes = new[] { "Assets/MainScene.unity" };
+    buildPlayerOptions.locationPathName = "../mazerunner.app";
+    buildPlayerOptions.target = BuildTarget.StandaloneOSX;
+    buildPlayerOptions.options = BuildOptions.None;
+    BuildPipeline.BuildPlayer(buildPlayerOptions);
+  }
 #endif
 
   bool sent = false;
