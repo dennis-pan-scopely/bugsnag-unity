@@ -29,6 +29,16 @@ public class Main : MonoBehaviour {
     buildPlayerOptions.options = BuildOptions.None;
     BuildPipeline.BuildPlayer(buildPlayerOptions);
   }
+
+  public static void Android() {
+    PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.bugsnag.mazerunner");
+    BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+    buildPlayerOptions.scenes = new[] { "Assets/MainScene.unity" };
+    buildPlayerOptions.locationPathName = "../mazerunner.apk";
+    buildPlayerOptions.target = BuildTarget.Android;
+    buildPlayerOptions.options = BuildOptions.None;
+    BuildPipeline.BuildPlayer(buildPlayerOptions);
+  }
 #endif
 
   bool sent = false;
