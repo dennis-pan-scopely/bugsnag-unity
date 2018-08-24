@@ -43,16 +43,12 @@ namespace BugsnagUnity
 
   class Configuration : IConfiguration
   {
-    const string DefaultEndpoint = "https://notify.bugsnag.com";
-
-    const string DefaultSessionEndpoint = "https://sessions.bugsnag.com";
-
     internal Configuration(string apiKey)
     {
       ApiKey = apiKey;
-      Endpoint = new Uri(DefaultEndpoint);
+      Endpoint = new Uri(Bugsnag.NotifyEndpoint);
       AutoNotify = true;
-      SessionEndpoint = new Uri(DefaultSessionEndpoint);
+      SessionEndpoint = new Uri(Bugsnag.SessionsEndpoint);
       MaximumBreadcrumbs = 25;
       ReleaseStage = "production";
       NotifyLevel = LogType.Exception;
@@ -103,10 +99,6 @@ namespace BugsnagUnity
 
   class AndroidConfiguration : IConfiguration
   {
-    const string DefaultEndpoint = "https://notify.bugsnag.com";
-
-    const string DefaultSessionEndpoint = "https://sessions.bugsnag.com";
-
     internal AndroidJavaObject JavaObject { get; }
 
     internal AndroidConfiguration(string apiKey)
@@ -115,9 +107,9 @@ namespace BugsnagUnity
         // the bugsnag-unity notifier will handle session tracking
       JavaObject.Call("setAutoCaptureSessions", false);
 
-      Endpoint = new Uri(DefaultEndpoint);
+      Endpoint = new Uri(Bugsnag.NotifyEndpoint);
       AutoNotify = true;
-      SessionEndpoint = new Uri(DefaultSessionEndpoint);
+      SessionEndpoint = new Uri(Bugsnag.SessionsEndpoint);
       MaximumBreadcrumbs = 25;
       ReleaseStage = "production";
       NotifyLevel = LogType.Exception;
@@ -236,10 +228,6 @@ namespace BugsnagUnity
 
   class MacOSConfiguration : IConfiguration
   {
-    const string DefaultEndpoint = "https://notify.bugsnag.com";
-
-    const string DefaultSessionEndpoint = "https://sessions.bugsnag.com";
-
     [DllImport("bugsnag-osx", EntryPoint = "bugsnag_createConfiguration")]
     static extern IntPtr CreateConfiguration(string apiKey);
 
@@ -283,9 +271,9 @@ namespace BugsnagUnity
     internal MacOSConfiguration(string apiKey)
     {
       NativeConfiguration = CreateConfiguration(apiKey);
-      Endpoint = new Uri(DefaultEndpoint);
+      Endpoint = new Uri(Bugsnag.NotifyEndpoint);
       AutoNotify = true;
-      SessionEndpoint = new Uri(DefaultSessionEndpoint);
+      SessionEndpoint = new Uri(Bugsnag.SessionsEndpoint);
       MaximumBreadcrumbs = 25;
       ReleaseStage = "production";
       NotifyLevel = LogType.Exception;
@@ -378,10 +366,6 @@ namespace BugsnagUnity
 
   class iOSConfiguration : IConfiguration
   {
-    const string DefaultEndpoint = "https://notify.bugsnag.com";
-
-    const string DefaultSessionEndpoint = "https://sessions.bugsnag.com";
-
     [DllImport("__Internal", EntryPoint = "bugsnag_createConfiguration")]
     static extern IntPtr CreateConfiguration(string apiKey);
 
@@ -425,9 +409,9 @@ namespace BugsnagUnity
     internal iOSConfiguration(string apiKey)
     {
       NativeConfiguration = CreateConfiguration(apiKey);
-      Endpoint = new Uri(DefaultEndpoint);
+      Endpoint = new Uri(Bugsnag.NotifyEndpoint);
       AutoNotify = true;
-      SessionEndpoint = new Uri(DefaultSessionEndpoint);
+      SessionEndpoint = new Uri(Bugsnag.SessionsEndpoint);
       MaximumBreadcrumbs = 25;
       ReleaseStage = "production";
       NotifyLevel = LogType.Exception;

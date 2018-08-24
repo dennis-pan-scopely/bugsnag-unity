@@ -4,6 +4,10 @@ namespace BugsnagUnity
 {
   public static class Bugsnag
   {
+    public const string NotifyEndpoint = "https://notify.bugsnag.com";
+
+    public const string SessionsEndpoint = "https://sessions.bugsnag.com";
+  
     static object _clientLock = new object();
 
     public static IClient Init(string apiKey)
