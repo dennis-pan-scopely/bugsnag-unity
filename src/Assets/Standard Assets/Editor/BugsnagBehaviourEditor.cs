@@ -14,6 +14,8 @@ namespace BugsnagUnity
     SerializedProperty autoNotify;
     SerializedProperty autoCaptureSessions;
     SerializedProperty uniqueLogsPerSecond;
+    SerializedProperty notify;
+    SerializedProperty sessions;
 
     void OnEnable()
     {
@@ -24,6 +26,8 @@ namespace BugsnagUnity
       notifyLevel = serializedObject.FindProperty("NotifyLevel");
       maximumBreadcrumbs = serializedObject.FindProperty("MaximumBreadcrumbs");
       uniqueLogsPerSecond = serializedObject.FindProperty("UniqueLogsPerSecond");
+      notify = serializedObject.FindProperty("Notify");
+      sessions = serializedObject.FindProperty("Sessions");
     }
 
     public override void OnInspectorGUI()
@@ -41,6 +45,8 @@ namespace BugsnagUnity
         EditorGUI.indentLevel++;
         EditorGUILayout.PropertyField(maximumBreadcrumbs, new GUIContent("Maximum Breadcrumbs"));
         EditorGUILayout.PropertyField(uniqueLogsPerSecond, new GUIContent("Unique Logs per second", "The number of unique Unity logs per second that Bugsnag will convert to breadcrumbs or report as errors (if configured). Lower the value to address performance problems."));
+        EditorGUILayout.PropertyField(notify, new GUIContent("Notify endpoint"));
+        EditorGUILayout.PropertyField(sessions, new GUIContent("Sessions endpoint"));
         EditorGUI.indentLevel--;
       }
 

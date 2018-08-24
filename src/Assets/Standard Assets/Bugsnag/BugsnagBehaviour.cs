@@ -23,6 +23,10 @@ namespace BugsnagUnity
 
     public bool AutoCaptureSessions = true;
 
+    public string Notify = Bugsnag.NotifyEndpoint;
+
+    public string Sessions = Bugsnag.SessionsEndpoint;
+
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// We use this to pull the fields that have been set in the
@@ -31,6 +35,8 @@ namespace BugsnagUnity
     void Awake()
     {
       Bugsnag.Init(BugsnagApiKey);
+      Bugsnag.Client.Configuration.Endpoint = new Uri(Notify);
+      Bugsnag.Client.Configuration.SessionEndpoint = new Uri(Sessions);
       Bugsnag.Client.Configuration.AutoNotify = AutoNotify;
       Bugsnag.Client.Configuration.AutoCaptureSessions = AutoCaptureSessions;
       Bugsnag.Client.Configuration.UniqueLogsTimePeriod = TimeSpan.FromSeconds(UniqueLogsPerSecond);
@@ -57,6 +63,21 @@ namespace BugsnagUnity
     {
       var hasFocus = !paused;
       Bugsnag.Client.SetApplicationState(hasFocus);
+    }
+
+    void OnValidate()
+    {
+      Uri temp;
+
+      if (!Uri.TryCreate(Notify, UriKind.Absolute, out temp))
+      {
+        Notify = Bugsnag.NotifyEndpoint;
+      }
+
+      if (!Uri.TryCreate(Sessions, UriKind.Absolute, out temp))
+      {
+        Sessions = Bugsnag.SessionsEndpoint;
+      }
     }
   }
 }
