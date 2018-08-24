@@ -14,6 +14,7 @@ public class Main : MonoBehaviour {
     var obj = new GameObject("Bugsnag");
     var bugsnag = obj.AddComponent<BugsnagUnity.BugsnagBehaviour>();
     bugsnag.BugsnagApiKey = System.Environment.GetEnvironmentVariable("BUGSNAG_APIKEY");
+    bugsnag.Notify = System.Environment.GetEnvironmentVariable("MAZE_ENDPOINT");
     obj.AddComponent<Main>();
     UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene, "Assets/MainScene.unity");
     var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
@@ -48,8 +49,6 @@ public class Main : MonoBehaviour {
     // only send one crash
     if (!sent) {
       sent = true;
-      BugsnagUnity.Bugsnag.Client.Configuration.Endpoint =
-        new System.Uri(System.Environment.GetEnvironmentVariable("MAZE_ENDPOINT"));
       BugsnagUnity.Bugsnag.Client.Breadcrumbs.Leave("bleeb");
       BugsnagUnity.Bugsnag.Client.Notify(new System.Exception("blorb"), report => {
         report.Event.User.Name = "blarb";
