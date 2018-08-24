@@ -1,7 +1,7 @@
 Feature: Handled Errors and Exceptions
 
 Scenario Outline: Reporting a handled exception
-  Given I configure the bugsnag notify endpoint
+  Given I configure the bugsnag notify endpoint with "<endpoint>"
   And I set environment variable "BUGSNAG_APIKEY" to "a35a2a72bd230ac0aa0f52715bbdc6aa"
   When I build a Unity application for "<platform>"
   And run the <platform> application
@@ -14,5 +14,6 @@ Scenario Outline: Reporting a handled exception
   And the exception "message" equals "blorb"
 
 Examples:
-  | platform |
-  | MacOS    |
+  | platform | endpoint   |
+  | Android  | 10.0.2.2   |
+  | MacOS    | localhost  |

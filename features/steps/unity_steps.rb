@@ -10,8 +10,15 @@ When("run the MacOS application") do
   ])
 end
 
-Given("I configure the bugsnag notify endpoint") do
+When("run the Android application") do
+  emu = AndroidEmulator.new("nexus")
+  emu.run_application "features/fixtures/mazerunner.apk",
+    "com.bugsnag.mazerunner",
+    "com.unity3d.player.UnityPlayerActivity"
+end
+
+Given("I configure the bugsnag notify endpoint with {string}") do |host|
   steps %Q{
-    When I set environment variable "MAZE_ENDPOINT" to "http://localhost:#{MOCK_API_PORT}"
+    When I set environment variable "MAZE_ENDPOINT" to "http://#{host}:#{MOCK_API_PORT}"
   }
 end
