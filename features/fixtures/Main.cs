@@ -31,6 +31,7 @@ public class Main : MonoBehaviour {
   }
 
   public static void Android() {
+    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.X86;
     PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.bugsnag.mazerunner");
     BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
     buildPlayerOptions.scenes = new[] { "Assets/MainScene.unity" };
