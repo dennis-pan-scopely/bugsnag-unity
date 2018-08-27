@@ -69,6 +69,17 @@ def assets_path
   File.join(project_path, "Assets", "Plugins")
 end
 
+def maze_runner(args)
+  command = ["bundle", "exec", "bugsnag-maze-runner"]
+
+  if args[:tag]
+    command << "--tags"
+    command << "@#{args[:tag]}"
+  end
+
+  sh *command
+end
+
 namespace :plugin do
   namespace :build do
     task all: [:assets, :cocoa, :csharp, :android, :webgl]
@@ -206,14 +217,14 @@ namespace :plugin do
   end
 
   task :maze_runner, [:tag] => %w[plugin:export] do |_, args|
-    command = ["bundle", "exec", "bugsnag-maze-runner"]
+    maze_runner args
+  end
+end
 
-    if args[:tag]
-      command << "--tags"
-      command << "@#{args[:tag]}"
-    end
-
-    sh *command
+namespace :travis do
+  # run the maze runner task without building the plugin first as
+  task :maze_runner, [:tag] do |_, args|
+    maze_runner args
   end
 end
 
