@@ -13,7 +13,12 @@ Scenario Outline: Reporting a handled exception
   And the exception "errorClass" equals "System.Exception"
   And the exception "message" equals "blorb"
 
+@android
 Examples:
   | platform | endpoint   |
   | Android  | 10.0.2.2   |
+
+@macos
+Examples:
+  | platform | endpoint   |
   | MacOS    | localhost  |

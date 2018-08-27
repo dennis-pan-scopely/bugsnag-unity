@@ -205,8 +205,15 @@ namespace :plugin do
     unity "-projectPath", project_path, "-exportPackage", "Assets", package_output
   end
 
-  task maze_runner: %w[plugin:export] do
-    sh "bundle", "exec", "bugsnag-maze-runner"
+  task :maze_runner, [:tag] => %w[plugin:export] do |_, args|
+    command = ["bundle", "exec", "bugsnag-maze-runner"]
+
+    if args[:tag]
+      command << "--tags"
+      command << "@#{args[:tag]}"
+    end
+
+    sh *command
   end
 end
 
